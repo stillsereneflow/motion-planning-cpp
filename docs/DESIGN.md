@@ -95,7 +95,7 @@ third-party JSON library) to keep the core dependency-free.
 ## Roadmap
 
 - [x] M0: scaffolding — CMake, clang-format, CI, design doc
-- [ ] M1: `GridMap` + A* with full test coverage, demo scenarios, README
+- [x] M1: `GridMap` + A* with full test coverage, demo scenarios, README
 - [ ] M2: Hybrid A* with bicycle model + parking demo
 - [ ] M3: RRT / RRT* + comparison benchmarks against A*
 - [ ] M4: trajectory smoothing + velocity profiles
