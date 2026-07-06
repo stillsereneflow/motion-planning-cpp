@@ -15,6 +15,7 @@ add_executable(mpl_tests
   test_astar.cpp
   test_distance_field.cpp
   test_grid_map.cpp
+  test_reeds_shepp.cpp
   test_vehicle.cpp)
 target_link_libraries(mpl_tests PRIVATE mpl GTest::gtest_main)
 
