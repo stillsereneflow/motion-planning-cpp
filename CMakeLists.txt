@@ -17,3 +17,12 @@ if(MSVC)
 else()
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
+
+add_library(mpl
+  src/grid_map.cpp)
+target_include_directories(mpl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+if(MPL_BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
