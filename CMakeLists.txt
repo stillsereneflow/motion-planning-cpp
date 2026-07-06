@@ -19,7 +19,8 @@ else()
 endif()
 
 add_library(mpl
-  src/grid_map.cpp)
+  src/grid_map.cpp
+  src/planners/astar.cpp)
 target_include_directories(mpl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 if(MPL_BUILD_TESTS)

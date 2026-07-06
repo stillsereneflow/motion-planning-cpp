@@ -12,6 +12,7 @@ endif()
 include(GoogleTest)
 
 add_executable(mpl_tests
+  test_astar.cpp
   test_grid_map.cpp)
 target_link_libraries(mpl_tests PRIVATE mpl GTest::gtest_main)
 
