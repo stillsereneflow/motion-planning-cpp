@@ -50,8 +50,9 @@ class ReedsShepp {
   // Length of the shortest path in meters.
   double distance(const Pose2d& from, const Pose2d& to) const;
 
-  // Poses spaced every `step` meters along `path` starting at `from`; the
-  // exact end pose is always appended last.
+  // Poses spaced at most `step` meters apart along `path` starting at
+  // `from`. Every segment boundary — gear switches in particular — and the
+  // exact end pose are always included.
   std::vector<Pose2d> sample(const RSPath& path, const Pose2d& from, double step) const;
 
   double turning_radius() const { return radius_; }

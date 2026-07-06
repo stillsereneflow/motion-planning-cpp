@@ -376,21 +376,21 @@ std::vector<Pose2d> ReedsShepp::sample(const RSPath& path, const Pose2d& from,
   }
 
   Pose2d segment_start = from;
-  double leftover = step;  // distance until the next emitted pose, in meters
   for (const RSSegment& segment : path.segments) {
     const double segment_meters = std::abs(segment.length) * radius_;
     const double direction = segment.length >= 0.0 ? 1.0 : -1.0;
-    double travelled = 0.0;
-    while (travelled + leftover < segment_meters) {
-      travelled += leftover;
-      leftover = step;
+    double travelled = step;
+    while (travelled < segment_meters) {
       const double param = direction * travelled / radius_;
       poses.push_back(applySegment(segment_start, segment.type, param, radius_));
+      travelled += step;
     }
-    leftover -= segment_meters - travelled;
+    // Segment boundaries (gear switches and word junctions) are always
+    // emitted so that consumers see every cusp, even on segments shorter
+    // than the sampling step.
     segment_start = applySegment(segment_start, segment.type, segment.length, radius_);
+    poses.push_back(segment_start);
   }
-  poses.push_back(segment_start);
   return poses;
 }
 
