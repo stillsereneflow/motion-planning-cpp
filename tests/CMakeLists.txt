@@ -13,7 +13,9 @@ include(GoogleTest)
 
 add_executable(mpl_tests
   test_astar.cpp
-  test_grid_map.cpp)
+  test_distance_field.cpp
+  test_grid_map.cpp
+  test_vehicle.cpp)
 target_link_libraries(mpl_tests PRIVATE mpl GTest::gtest_main)
 
 gtest_discover_tests(mpl_tests)

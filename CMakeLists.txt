@@ -19,8 +19,10 @@ else()
 endif()
 
 add_library(mpl
+  src/distance_field.cpp
   src/grid_map.cpp
-  src/planners/astar.cpp)
+  src/planners/astar.cpp
+  src/vehicle.cpp)
 target_include_directories(mpl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 if(MPL_BUILD_TESTS)
