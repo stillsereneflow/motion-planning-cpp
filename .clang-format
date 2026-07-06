@@ -1,0 +1,12 @@
+BasedOnStyle: Google
+ColumnLimit: 100
+DerivePointerAlignment: false
+PointerAlignment: Left
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^"mpl/'
+    Priority: 2
+  - Regex: '^<gtest/'
+    Priority: 3
+  - Regex: '^<'
+    Priority: 1
