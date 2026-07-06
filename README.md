@@ -22,7 +22,8 @@ verifiable — see [docs/DESIGN.md](docs/DESIGN.md) for the architecture.
 | Algorithm | Status | Notes |
 | --- | --- | --- |
 | A* (4/8-connected) | ✅ done | Octile/Manhattan heuristic, weighted mode, corner-cutting prevention |
-| Hybrid A* | 🚧 planned (M2) | Bicycle model, Reeds-Shepp expansions, parking scenarios |
+| Reeds-Shepp curves | ✅ done | All word families with timeflip/reflect/backwards symmetries |
+| Hybrid A* | ✅ done | Exact bicycle-model primitives, dual admissible heuristic, RS analytic expansion |
 | RRT / RRT* | 🚧 planned (M3) | Goal biasing, rewiring, benchmarks against A* |
 | Trajectory smoothing | 🚧 planned (M4) | Gradient smoothing + velocity profile under accel limits |
 
@@ -41,7 +42,21 @@ narrow_gap          yes       60.77         263       0.100
 | --- | --- |
 | ![u_trap](docs/images/u_trap.png) | ![narrow_gap](docs/images/narrow_gap.png) |
 
-![open_field](docs/images/open_field.png)
+### Parking with Hybrid A*
+
+Output of `parking_demo` — kinematically feasible maneuvers for a 4.5 m car
+with a ~3.95 m minimum turning radius, blue driven forward, orange in
+reverse:
+
+```
+scenario                  success      cost     cusps    expanded     time_ms
+perpendicular_parking         yes     22.10         1        1450       132.4
+parallel_parking              yes     14.99         2        1445       123.3
+```
+
+![perpendicular_parking](docs/images/perpendicular_parking.png)
+
+![parallel_parking](docs/images/parallel_parking.png)
 
 ## Build & run
 
@@ -52,7 +67,8 @@ Requires a C++17 compiler and CMake ≥ 3.20. GoogleTest is located via
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure   # run the unit tests
-./build/apps/plan_demo out                   # run demo scenarios
+./build/apps/plan_demo out                   # grid A* demo scenarios
+./build/apps/parking_demo out                # Hybrid A* parking scenarios
 python3 tools/visualize.py out/*.json --out-dir docs/images
 ```
 
@@ -71,7 +87,7 @@ docs/          design doc + rendered images
 
 面向自动驾驶的运动规划算法库，使用现代 C++17 从零实现，核心库不依赖任何第三方框架。
 
-目前已实现 A*（八连通/四连通、加权模式、禁止对角穿墙），路线图包括 Hybrid A*（自行车运动学模型 + 泊车场景）、RRT/RRT* 以及轨迹平滑与速度规划。每个算法都配有单元测试和可复现的演示场景，输出路径代价、扩展节点数、耗时等量化指标；演示结果由 `tools/visualize.py` 渲染成上方图片。架构与路线图见[设计文档](docs/DESIGN.md)。
+目前已实现：A*（八连通/四连通、加权模式、禁止对角穿墙）、Reeds-Shepp 曲线（全部字族 + 三种对称变换，600 组随机位姿性质测试验证）、Hybrid A*（精确自行车模型运动基元、RS 距离与障碍距离场取大的双可采纳启发式、RS 解析扩展精确接入目标位姿），可完成垂直泊车与平行泊车等多次换挡机动。路线图还包括 RRT/RRT* 与轨迹平滑、速度规划。每个算法都配有单元测试和可复现的演示场景，输出路径代价、换挡次数、扩展节点数、耗时等量化指标；演示结果由 `tools/visualize.py` 渲染成上方图片。架构与路线图见[设计文档](docs/DESIGN.md)。
 
 ## License
 
