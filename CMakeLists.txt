@@ -27,3 +27,7 @@ if(MPL_BUILD_TESTS)
   enable_testing()
   add_subdirectory(tests)
 endif()
+
+if(MPL_BUILD_APPS)
+  add_subdirectory(apps)
+endif()
