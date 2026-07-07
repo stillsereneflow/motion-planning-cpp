@@ -130,12 +130,64 @@ def render_tree(data, out_dir: Path) -> Path:
     return out_path
 
 
+def render_trajectory(data, out_dir: Path) -> Path:
+    """Raw path (dashed) vs smoothed trajectory colored by speed."""
+    from matplotlib.collections import LineCollection
+
+    width, height, res = data["width"], data["height"], data["resolution"]
+    ox, oy = data["origin"]
+    extent = (ox, ox + width * res, oy, oy + height * res)
+
+    grid = np.zeros((height, width))
+    for x, y in data["obstacles"]:
+        grid[y, x] = 1.0
+
+    fig, ax = plt.subplots(figsize=(9, 9 * height / width))
+    ax.imshow(grid, cmap="Greys", origin="lower", interpolation="none",
+              extent=extent, vmax=1.4)
+
+    raw = np.array(data["raw_path"])
+    ax.plot(raw[:, 0], raw[:, 1], color="grey", linestyle="--", linewidth=1.4,
+            label="raw RRT* path")
+
+    points = np.array(data["points"])
+    segments = np.stack([points[:-1, :2], points[1:, :2]], axis=1)
+    speeds = 0.5 * (points[:-1, 2] + points[1:, 2])
+    lines = LineCollection(segments, cmap="viridis", linewidths=3.2)
+    lines.set_array(speeds)
+    lines.set_clim(0.0, data["stats"]["v_max"])
+    ax.add_collection(lines)
+    fig.colorbar(lines, ax=ax, label="speed [m/s]", shrink=0.8)
+
+    ax.plot(*data["start"], marker="o", color="tab:green", markersize=10,
+            linestyle="none", label="start")
+    ax.plot(*data["goal"], marker="*", color="tab:red", markersize=16,
+            linestyle="none", label="goal")
+
+    stats = data["stats"]
+    ax.set_title(
+        f"{data['name']}  |  {stats['raw_cost']:.1f} m raw -> {stats['smooth_cost']:.1f} m "
+        f"smoothed  |  {stats['total_time_s']:.1f} s"
+    )
+    ax.legend(loc="upper right")
+    ax.set_xlim(extent[0], extent[1])
+    ax.set_ylim(extent[2], extent[3])
+    ax.set_aspect("equal")
+
+    out_path = out_dir / f"{data['name']}.png"
+    fig.savefig(out_path, dpi=130, bbox_inches="tight")
+    plt.close(fig)
+    return out_path
+
+
 def render(artifact_path: Path, out_dir: Path) -> Path:
     data = json.loads(artifact_path.read_text())
     if data.get("type") == "hybrid":
         return render_hybrid(data, out_dir)
     if data.get("type") == "tree":
         return render_tree(data, out_dir)
+    if data.get("type") == "trajectory":
+        return render_trajectory(data, out_dir)
     width, height = data["width"], data["height"]
 
     grid = np.zeros((height, width))
