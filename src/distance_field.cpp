@@ -55,4 +55,51 @@ std::vector<double> computeDistanceField(const GridMap& map, GridIndex goal) {
   return distance;
 }
 
+std::vector<double> computeObstacleDistanceField(const GridMap& map) {
+  const int width = map.width();
+  const std::size_t cell_count =
+      static_cast<std::size_t>(width) * static_cast<std::size_t>(map.height());
+  std::vector<double> distance(cell_count, std::numeric_limits<double>::infinity());
+
+  using Entry = std::pair<double, int>;
+  std::priority_queue<Entry, std::vector<Entry>, std::greater<Entry>> open;
+  for (int y = 0; y < map.height(); ++y) {
+    for (int x = 0; x < width; ++x) {
+      if (map.isOccupied({x, y})) {
+        const int cell = y * width + x;
+        distance[cell] = 0.0;
+        open.emplace(0.0, cell);  // multi-source: every obstacle cell seeds the wave
+      }
+    }
+  }
+
+  static constexpr std::array<std::array<int, 2>, 8> kOffsets = {
+      {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}}};
+  const double straight = map.resolution();
+  const double diagonal = map.resolution() * kSqrt2;
+
+  while (!open.empty()) {
+    const auto [dist, cell] = open.top();
+    open.pop();
+    if (dist > distance[cell]) {
+      continue;
+    }
+    const GridIndex index{cell % width, cell / width};
+    for (const auto& offset : kOffsets) {
+      const GridIndex next{index.x + offset[0], index.y + offset[1]};
+      if (!map.inBounds(next)) {
+        continue;
+      }
+      const bool is_diagonal = offset[0] != 0 && offset[1] != 0;
+      const double next_dist = dist + (is_diagonal ? diagonal : straight);
+      const int next_cell = next.y * width + next.x;
+      if (next_dist < distance[next_cell]) {
+        distance[next_cell] = next_dist;
+        open.emplace(next_dist, next_cell);
+      }
+    }
+  }
+  return distance;
+}
+
 }  // namespace mpl
