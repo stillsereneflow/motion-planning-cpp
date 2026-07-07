@@ -99,5 +99,6 @@ third-party JSON library) to keep the core dependency-free.
 - [x] M2: Hybrid A* — vehicle footprint collision, Reeds-Shepp curves,
       distance-field heuristic, analytic expansion, parking demos
 - [x] M3: RRT / RRT* + comparison benchmarks against A*
-- [ ] M4: trajectory smoothing + velocity profiles
-- [ ] M5: benchmark suite across scenario library, results table in README
+- [x] M4: trajectory smoothing + velocity profiles
+- [x] M5: benchmark suite across the scenario library, results table in
+      README (delivered together with M3's benchmark app)

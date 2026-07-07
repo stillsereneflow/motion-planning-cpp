@@ -25,7 +25,7 @@ verifiable — see [docs/DESIGN.md](docs/DESIGN.md) for the architecture.
 | Reeds-Shepp curves | ✅ done | All word families with timeflip/reflect/backwards symmetries |
 | Hybrid A* | ✅ done | Exact bicycle-model primitives, dual admissible heuristic, RS analytic expansion |
 | RRT / RRT* | ✅ done | Goal biasing, rewiring with subtree cost propagation, benchmarks |
-| Trajectory smoothing | 🚧 planned (M4) | Gradient smoothing + velocity profile under accel limits |
+| Trajectory smoothing | ✅ done | Gradient smoothing + trapezoidal velocity profile under accel limits |
 
 ## Demo
 
@@ -85,6 +85,21 @@ RRT* moves in continuous space.
 | --- | --- |
 | ![rrt tree](docs/images/rrt_u_trap.png) | ![rrt star tree](docs/images/rrt_star_u_trap.png) |
 
+### Smoothing and velocity profile
+
+`smooth_demo` runs the full pipeline: RRT* plans, the gradient smoother
+irons the path out (bending energy + obstacle repulsion, endpoints fixed,
+every iterate collision-checked), and the profiler time-parameterizes it —
+per-point speed capped by the lateral-acceleration/curvature limit, then
+trapezoidal forward/backward passes:
+
+![trajectory](docs/images/trajectory_u_trap.png)
+
+The speed coloring shows the profile braking into both U-turns and
+stretching out on the straights. The smoothed path is ~2.5 m *longer* than
+the raw one — the repulsion term deliberately trades length for obstacle
+clearance.
+
 ## Build & run
 
 Requires a C++17 compiler and CMake ≥ 3.20. GoogleTest is located via
@@ -96,6 +111,8 @@ cmake --build build --parallel
 ctest --test-dir build --output-on-failure   # run the unit tests
 ./build/apps/plan_demo out                   # grid A* demo scenarios
 ./build/apps/parking_demo out                # Hybrid A* parking scenarios
+./build/apps/benchmark out                   # A* vs RRT vs RRT* table
+./build/apps/smooth_demo out                 # smoothing + velocity profile
 python3 tools/visualize.py out/*.json --out-dir docs/images
 ```
 
@@ -114,7 +131,7 @@ docs/          design doc + rendered images
 
 面向自动驾驶的运动规划算法库，使用现代 C++17 从零实现，核心库不依赖任何第三方框架。
 
-目前已实现：A*（八连通/四连通、加权模式、禁止对角穿墙）、Reeds-Shepp 曲线（全部字族 + 三种对称变换，600 组随机位姿性质测试验证）、Hybrid A*（精确自行车模型运动基元、RS 距离与障碍距离场取大的双可采纳启发式、RS 解析扩展精确接入目标位姿），可完成垂直泊车与平行泊车等多次换挡机动。路线图还包括 RRT/RRT* 与轨迹平滑、速度规划。每个算法都配有单元测试和可复现的演示场景，输出路径代价、换挡次数、扩展节点数、耗时等量化指标；演示结果由 `tools/visualize.py` 渲染成上方图片。架构与路线图见[设计文档](docs/DESIGN.md)。
+已实现全部路线图算法：A*（八连通/四连通、加权模式、禁止对角穿墙）、Reeds-Shepp 曲线（全部字族 + 三种对称变换，600 组随机位姿性质测试验证）、Hybrid A*（精确自行车模型运动基元、双可采纳启发式、RS 解析扩展，完成垂直/平行泊车多次换挡机动）、RRT/RRT*（邻域重连 + 子树代价传播，基准显示连续空间的 RRT* 路径代价优于栅格 A*）、轨迹平滑与速度规划（梯度平滑 + 障碍斥力，曲率限速 + 梯形加减速）。每个算法都配有单元测试和可复现的演示场景，输出路径代价、换挡次数、扩展节点数、耗时等量化指标；演示结果由 `tools/visualize.py` 渲染成上方图片。架构与设计取舍见[设计文档](docs/DESIGN.md)。
 
 ## License
 
