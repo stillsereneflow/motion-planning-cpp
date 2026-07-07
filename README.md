@@ -24,7 +24,7 @@ verifiable — see [docs/DESIGN.md](docs/DESIGN.md) for the architecture.
 | A* (4/8-connected) | ✅ done | Octile/Manhattan heuristic, weighted mode, corner-cutting prevention |
 | Reeds-Shepp curves | ✅ done | All word families with timeflip/reflect/backwards symmetries |
 | Hybrid A* | ✅ done | Exact bicycle-model primitives, dual admissible heuristic, RS analytic expansion |
-| RRT / RRT* | 🚧 planned (M3) | Goal biasing, rewiring, benchmarks against A* |
+| RRT / RRT* | ✅ done | Goal biasing, rewiring with subtree cost propagation, benchmarks |
 | Trajectory smoothing | 🚧 planned (M4) | Gradient smoothing + velocity profile under accel limits |
 
 ## Demo
@@ -57,6 +57,33 @@ parallel_parking              yes     14.99         2        1445       123.3
 ![perpendicular_parking](docs/images/perpendicular_parking.png)
 
 ![parallel_parking](docs/images/parallel_parking.png)
+
+### A* vs RRT vs RRT* benchmark
+
+Output of `benchmark` — sampling planners averaged over 10 seeds
+(6000-iteration budget, costs in meters):
+
+```
+scenario      planner      success      cost_m       nodes     time_ms
+open_field    A*             10/10       66.67         151        0.04
+open_field    RRT            10/10       77.89         220        0.30
+open_field    RRT*           10/10       62.79        5063      248.91
+u_trap        A*             10/10       52.87         365        0.04
+u_trap        RRT            10/10       82.71         468        1.57
+u_trap        RRT*           10/10       50.60        5127      241.06
+narrow_gap    A*             10/10       60.77         263        0.04
+narrow_gap    RRT            10/10       70.41         285        0.74
+narrow_gap    RRT*           10/10       56.93        5379      265.29
+```
+
+Two classic trade-offs, measured: plain RRT is fast but crooked; RRT*
+spends its full budget rewiring and ends up **cheaper than grid A***,
+because the 8-connected grid overestimates free-space distances while
+RRT* moves in continuous space.
+
+| RRT (first solution) | RRT* (rewired) |
+| --- | --- |
+| ![rrt tree](docs/images/rrt_u_trap.png) | ![rrt star tree](docs/images/rrt_star_u_trap.png) |
 
 ## Build & run
 

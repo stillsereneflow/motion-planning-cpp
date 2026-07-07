@@ -98,6 +98,6 @@ third-party JSON library) to keep the core dependency-free.
 - [x] M1: `GridMap` + A* with full test coverage, demo scenarios, README
 - [x] M2: Hybrid A* — vehicle footprint collision, Reeds-Shepp curves,
       distance-field heuristic, analytic expansion, parking demos
-- [ ] M3: RRT / RRT* + comparison benchmarks against A*
+- [x] M3: RRT / RRT* + comparison benchmarks against A*
 - [ ] M4: trajectory smoothing + velocity profiles
 - [ ] M5: benchmark suite across scenario library, results table in README
