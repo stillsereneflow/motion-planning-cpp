@@ -87,10 +87,55 @@ def render_hybrid(data, out_dir: Path) -> Path:
     return out_path
 
 
+def render_tree(data, out_dir: Path) -> Path:
+    """Sampling tree (thin grey), final path (bold) and endpoints."""
+    from matplotlib.collections import LineCollection
+
+    width, height, res = data["width"], data["height"], data["resolution"]
+    ox, oy = data["origin"]
+    extent = (ox, ox + width * res, oy, oy + height * res)
+
+    grid = np.zeros((height, width))
+    for x, y in data["obstacles"]:
+        grid[y, x] = 1.0
+
+    fig, ax = plt.subplots(figsize=(9, 9 * height / width))
+    ax.imshow(grid, cmap="Greys", origin="lower", interpolation="none",
+              extent=extent, vmax=1.4)
+
+    segments = [[(x1, y1), (x2, y2)] for x1, y1, x2, y2 in data["edges"]]
+    ax.add_collection(LineCollection(segments, colors="silver", linewidths=0.5))
+
+    if data["path"]:
+        path = np.array(data["path"])
+        ax.plot(path[:, 0], path[:, 1], color="tab:blue", linewidth=2.4, label="path")
+    ax.plot(*data["start"], marker="o", color="tab:green", markersize=10,
+            linestyle="none", label="start")
+    ax.plot(*data["goal"], marker="*", color="tab:red", markersize=16,
+            linestyle="none", label="goal")
+
+    stats = data["stats"]
+    ax.set_title(
+        f"{data['name']}  |  cost {stats['path_cost']:.2f} m  |  "
+        f"{stats['nodes_expanded']} nodes  |  {stats['runtime_ms']:.0f} ms"
+    )
+    ax.legend(loc="upper right")
+    ax.set_xlim(extent[0], extent[1])
+    ax.set_ylim(extent[2], extent[3])
+    ax.set_aspect("equal")
+
+    out_path = out_dir / f"{data['name']}.png"
+    fig.savefig(out_path, dpi=130, bbox_inches="tight")
+    plt.close(fig)
+    return out_path
+
+
 def render(artifact_path: Path, out_dir: Path) -> Path:
     data = json.loads(artifact_path.read_text())
     if data.get("type") == "hybrid":
         return render_hybrid(data, out_dir)
+    if data.get("type") == "tree":
+        return render_tree(data, out_dir)
     width, height = data["width"], data["height"]
 
     grid = np.zeros((height, width))

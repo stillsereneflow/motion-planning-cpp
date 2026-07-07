@@ -3,3 +3,6 @@ target_link_libraries(plan_demo PRIVATE mpl)
 
 add_executable(parking_demo parking_demo.cpp)
 target_link_libraries(parking_demo PRIVATE mpl)
+
+add_executable(benchmark benchmark.cpp)
+target_link_libraries(benchmark PRIVATE mpl)
