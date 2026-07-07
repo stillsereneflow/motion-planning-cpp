@@ -23,6 +23,7 @@ add_library(mpl
   src/grid_map.cpp
   src/planners/astar.cpp
   src/planners/hybrid_astar.cpp
+  src/planners/rrt.cpp
   src/reeds_shepp.cpp
   src/vehicle.cpp)
 target_include_directories(mpl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
