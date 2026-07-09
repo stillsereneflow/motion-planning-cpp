@@ -128,9 +128,13 @@ std::vector<Point2d> smoothPath(const GridMap& map, const std::vector<Point2d>& 
 }
 
 std::vector<TrajectoryPoint> computeVelocityProfile(const std::vector<Point2d>& path,
-                                                    const VelocityConfig& config) {
+                                                    const VelocityConfig& config,
+                                                    const std::vector<double>& speed_limit) {
   if (config.v_max <= 0.0 || config.a_max <= 0.0 || config.a_lat_max <= 0.0) {
     throw std::invalid_argument("velocity limits must be positive");
+  }
+  if (!speed_limit.empty() && speed_limit.size() != path.size()) {
+    throw std::invalid_argument("speed_limit must be empty or match path size");
   }
   std::vector<TrajectoryPoint> trajectory(path.size());
   if (path.empty()) {
@@ -151,6 +155,9 @@ std::vector<TrajectoryPoint> computeVelocityProfile(const std::vector<Point2d>& 
     double cap = config.v_max;
     if (trajectory[i].curvature > 1e-9) {
       cap = std::min(cap, std::sqrt(config.a_lat_max / trajectory[i].curvature));
+    }
+    if (!speed_limit.empty()) {
+      cap = std::min(cap, speed_limit[i]);
     }
     trajectory[i].speed = cap;
   }

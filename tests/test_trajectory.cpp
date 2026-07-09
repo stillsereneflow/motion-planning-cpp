@@ -147,5 +147,40 @@ TEST(VelocityProfileTest, RejectsBadLimits) {
   EXPECT_THROW(computeVelocityProfile({{0, 0}, {1, 0}}, bad), std::invalid_argument);
 }
 
+TEST(VelocityProfileTest, PerPointSpeedLimitCapsZone) {
+  std::vector<Point2d> line;
+  for (int i = 0; i <= 100; ++i) {
+    line.push_back({i * 1.0, 0.0});
+  }
+  VelocityConfig config;
+  config.v_max = 10.0;
+  config.a_max = 2.0;
+
+  // A slow zone over indices 40..60, capped to 3 m/s.
+  std::vector<double> limit(line.size(), config.v_max);
+  for (std::size_t i = 40; i <= 60; ++i) {
+    limit[i] = 3.0;
+  }
+  const auto trajectory = computeVelocityProfile(line, config, limit);
+  for (std::size_t i = 40; i <= 60; ++i) {
+    EXPECT_LE(trajectory[i].speed, 3.0 + 1e-9);  // capped inside the zone
+  }
+  EXPECT_GT(trajectory[10].speed, 3.0);  // unconstrained away from the zone
+
+  // An empty limit reproduces the unconstrained profile exactly.
+  const auto baseline = computeVelocityProfile(line, config);
+  const auto empty_limit = computeVelocityProfile(line, config, {});
+  ASSERT_EQ(baseline.size(), empty_limit.size());
+  for (std::size_t i = 0; i < baseline.size(); ++i) {
+    EXPECT_DOUBLE_EQ(baseline[i].speed, empty_limit[i].speed);
+  }
+}
+
+TEST(VelocityProfileTest, RejectsMismatchedSpeedLimit) {
+  VelocityConfig config;
+  EXPECT_THROW(computeVelocityProfile({{0, 0}, {1, 0}, {2, 0}}, config, {1.0}),
+               std::invalid_argument);
+}
+
 }  // namespace
 }  // namespace mpl

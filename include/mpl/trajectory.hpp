@@ -46,7 +46,13 @@ struct TrajectoryPoint {
 // speed caps from the lateral-acceleration/curvature limit, then a forward
 // pass (acceleration) and a backward pass (braking), starting and ending at
 // rest.
+//
+// When non-empty, `speed_limit` adds a per-point speed cap [m/s] aligned with
+// `path`: each point's speed is the minimum of the curvature cap and this
+// limit. It models spatially varying limits such as slow zones, and must be
+// empty or the same length as `path`.
 std::vector<TrajectoryPoint> computeVelocityProfile(const std::vector<Point2d>& path,
-                                                    const VelocityConfig& config = {});
+                                                    const VelocityConfig& config = {},
+                                                    const std::vector<double>& speed_limit = {});
 
 }  // namespace mpl
